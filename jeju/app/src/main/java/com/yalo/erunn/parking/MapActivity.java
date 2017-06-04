@@ -1,65 +1,154 @@
 package com.yalo.erunn.parking;
 
 import android.Manifest;
+
 import android.content.pm.PackageManager;
+
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapActivity extends FragmentActivity implements
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+import java.io.IOException;
+
+import java.util.ArrayList;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
+public class MapActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        ActivityCompat.OnRequestPermissionsResultCallback, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
     private GoogleMap mMap;
+
+    Retrofit retrofit;
+    ApiService apiService;
+
+    ArrayList<Parking> parkings = new ArrayList<Parking>();
+
+    private EditText mEditTextQuery;
+    private Button mButtonSearch;
+    private FrameLayout mMapview;
+
+    int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        mMapview = (FrameLayout) mapFragment.getView();
+//        mEditTextQuery = (EditText) findViewById(R.id.et_search);
+//        mButtonSearch = (Button) findViewById(R.id.bt_search);
+
+
+        retrofit = new Retrofit.Builder().baseUrl(ApiService.ApiURL).build();
+        apiService = retrofit.create(ApiService.class);
+
+        Call<ResponseBody> parks = apiService.getParks();
+        parks.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    String result = response.body().string();
+                    try {
+                        JSONArray jsonArray = new JSONArray(result);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            parkings.add(new Parking(jsonObject.getString("주차장명")
+                                    , jsonObject.getString("소재지도로명주소")
+                                    , jsonObject.getInt("주차구획수")
+                                    , jsonObject.getString("요금정보")));
+
+
+//                            LatLng temp = new LatLng(addr.getLatitude(), addr.getLongitude());
+//                            mMap.addMarker(new MarkerOptions()
+//                                    .position(temp)
+//                                    .title("Marker in jeju cityhall")
+//                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.parking)));
+
+
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
         mapFragment.getMapAsync(this);
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(35.2339, 129.0798);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Busan Univ"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15));
+        LatLng jeju = new LatLng(33.4996, 126.5312);
+        mMap.addMarker(new MarkerOptions()
+                .position(jeju)
+                .title("Marker in jeju cityhall")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.parking)));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jeju, 15));
 
         mMap.setOnMyLocationButtonClickListener(this);
+
+        if (mMapview != null &&
+                mMapview.findViewById(Integer.parseInt("1")) != null) {
+            // Get the button view
+            View locationButton = ((View) mMapview.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            // and next place it, on bottom right (as Google Maps app)
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            // position on right bottom
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, 30, 30);
+        }
         enableMyLocation();
 
     }
@@ -83,6 +172,7 @@ public class MapActivity extends FragmentActivity implements
         Toast.makeText(this, "현재 위치를 탐색합니다.", Toast.LENGTH_SHORT).show();
         return false;
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -118,4 +208,12 @@ public class MapActivity extends FragmentActivity implements
         PermissionUtils.PermissionDeniedDialog
                 .newInstance(true).show(getSupportFragmentManager(), "dialog");
     }
+
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.v("Test", connectionResult + "");
+    }
+
+
 }

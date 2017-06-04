@@ -4,4 +4,5 @@
     <string name="location_permission_denied">위치 서비스가 거부되었습니다.</string>
     <string name="permission_required_toast">위치 서비스를 켜주세요.</string>
     <string name="permission_rationale_location">현재 위치를 보여주기 위해서는 위치 서비스를 켜야합니다.</string>
+    <string name="google_geo_key">AIzaSyAYIHqOKPlcLy-uD7jJ_0vqifgG01f0eRs</string>
 </resources>
