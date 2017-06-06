@@ -7,14 +7,16 @@ package com.yalo.erunn.parking;
 public class Parking {
     public String name;
     String roadAddress;
+    String address;
     int quantity;
     String free;
 
 
 
-    public Parking(String name, String roadAddress, int quantity, String free) {
+    public Parking(String name, String roadAddress, String address, int quantity, String free) {
         this.name = name;
         this.roadAddress= roadAddress;
+        this.address = address;
         this.quantity = quantity;
         this.free = free;
 
@@ -27,6 +29,7 @@ public class Parking {
 
     public String getName(){return this.name;};
     public String getRoadAddress(){return this.roadAddress;};
+    public String getAddress(){return this.address;};
     public int getQuantity(){return this.quantity;};
     public String getFree(){return this.free;};
 }

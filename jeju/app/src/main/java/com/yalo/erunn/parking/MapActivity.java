@@ -1,32 +1,31 @@
 package com.yalo.erunn.parking;
 
 import android.Manifest;
-
 import android.content.pm.PackageManager;
-
+import android.location.Address;
+import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-
 import com.google.android.gms.common.api.GoogleApiClient;
-
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -35,10 +34,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import java.io.IOException;
-
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -49,7 +48,8 @@ import retrofit2.Retrofit;
 public class MapActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback, GoogleApiClient.OnConnectionFailedListener {
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
@@ -60,23 +60,49 @@ public class MapActivity extends AppCompatActivity implements
 
     ArrayList<Parking> parkings = new ArrayList<Parking>();
 
-    private EditText mEditTextQuery;
-    private Button mButtonSearch;
     private FrameLayout mMapview;
-
-    int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
-        mMapview = (FrameLayout) mapFragment.getView();
-//        mEditTextQuery = (EditText) findViewById(R.id.et_search);
-//        mButtonSearch = (Button) findViewById(R.id.bt_search);
 
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+                String picker = place.getLatLng().toString();
+
+                int indexStart = picker.indexOf("(");
+                int indexShimPyo = picker.indexOf(",");
+                int indexLast = picker.indexOf(")");
+
+                String stringLat = picker.substring(indexStart + 1, indexShimPyo);
+                String stringLng = picker.substring(indexShimPyo + 1, indexLast);
+
+                double pickerLat = Double.parseDouble(stringLat);
+                double pickerLng = Double.parseDouble(stringLng);
+                LatLng pickerGeo = new LatLng(pickerLat, pickerLng);
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickerGeo, 15));
+
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.v("Test", status + "");
+
+            }
+        });
+
+
+        mMapview = (FrameLayout) mapFragment.getView();
 
         retrofit = new Retrofit.Builder().baseUrl(ApiService.ApiURL).build();
         apiService = retrofit.create(ApiService.class);
@@ -93,15 +119,14 @@ public class MapActivity extends AppCompatActivity implements
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
                             parkings.add(new Parking(jsonObject.getString("주차장명")
                                     , jsonObject.getString("소재지도로명주소")
+                                    , jsonObject.getString("소재지지번주소")
                                     , jsonObject.getInt("주차구획수")
                                     , jsonObject.getString("요금정보")));
+                            if (i == jsonArray.length() - 1) {
+                                SetMarker setMarker = new SetMarker(mMap,getApplicationContext(),parkings);
+                                setMarker.execute();
 
-
-//                            LatLng temp = new LatLng(addr.getLatitude(), addr.getLongitude());
-//                            mMap.addMarker(new MarkerOptions()
-//                                    .position(temp)
-//                                    .title("Marker in jeju cityhall")
-//                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.parking)));
+                            }
 
 
                         }
@@ -124,9 +149,7 @@ public class MapActivity extends AppCompatActivity implements
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = googleMap;
-
         LatLng jeju = new LatLng(33.4996, 126.5312);
         mMap.addMarker(new MarkerOptions()
                 .position(jeju)
