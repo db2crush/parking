@@ -6,9 +6,6 @@
     android:layout_height="match_parent"
     tools:context="com.yalo.erunn.parking.MapActivity">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <fragment
             android:id="@+id/map"
@@ -20,9 +17,18 @@
             android:id="@+id/place_autocomplete_fragment"
             android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            />
 
-    </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/infor_park"
+            android:layout_alignParentBottom="true"
+            android:background="@color/parkingFragment"
+           />
+
+
 
 
 </RelativeLayout>

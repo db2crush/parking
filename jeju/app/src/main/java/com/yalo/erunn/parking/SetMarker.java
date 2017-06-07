@@ -20,7 +20,7 @@ import java.util.Locale;
  * Created by erunn on 2017-06-06.
  */
 
-public class SetMarker extends AsyncTask<Void, Void, Void> {
+public class SetMarker extends AsyncTask<Void, Integer, Void> {
     GoogleMap mMap;
     Context context;
     ArrayList<Parking> parkings;
@@ -46,12 +46,14 @@ public class SetMarker extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected void onProgressUpdate(Void... values) {
+    protected void onProgressUpdate(Integer... values) {
+        Log.v("Test",values[0]+"");
         super.onProgressUpdate(values);
         park = new LatLng(lat, lng);
+
         mMap.addMarker(new MarkerOptions()
+                .zIndex(values[0])
                 .position(park)
-                .title(name)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.parking)));
     }
 
@@ -60,6 +62,7 @@ public class SetMarker extends AsyncTask<Void, Void, Void> {
         for (int i = 0; i < parkings.size(); i++) {
             address = parkings.get(i).getAddress();
             name = parkings.get(i).getName();
+            Log.v("index",name+" " +"doinbackground");
             try {
                 addrs = mGeoCoder.getFromLocationName(address, 1);
 
@@ -67,7 +70,7 @@ public class SetMarker extends AsyncTask<Void, Void, Void> {
                     lat = addrs.get(0).getLatitude();
                     lng = addrs.get(0).getLongitude();
                     addrs = null;
-                    publishProgress();
+                    publishProgress(i);
                 } else
                     continue;
 
