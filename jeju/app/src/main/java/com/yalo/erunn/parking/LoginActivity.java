@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
     }
 
-    public void login(){
+    public void login() {
         if (!validate()) {
             onLoginFailed();
             return;
