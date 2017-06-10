@@ -30,15 +30,13 @@ import static com.kakao.util.helper.Utility.getPackageInfo;
 /**
  * Created by erunn on 2017-06-10.
  */
-
+/* This activty is for testing KakaoNavi, not used in Application*/
 public class KakaoNaviActivity extends AppCompatActivity {
     @BindView(R.id.kakaos)
     Button kakao;
 
     @OnClick(R.id.kakaos)
     void clicks() {
-
-
     }
 
     @Override
