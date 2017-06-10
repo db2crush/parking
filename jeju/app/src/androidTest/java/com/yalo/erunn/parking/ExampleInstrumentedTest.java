@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.yalo.erunn.parking", appContext.getPackageName());
+        assertEquals("com.yalo.erunn.parking_icon", appContext.getPackageName());
     }
 }

@@ -57,7 +57,7 @@
                 android:id="@+id/park_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/park_button" />
+                android:background="@drawable/fragment_parking" />
 
 
         </LinearLayout>

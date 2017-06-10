@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -38,7 +37,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import butterknife.BindView;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -161,14 +159,10 @@ public class MapActivity extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        LatLng initial = new LatLng(33.489045, 126.491207);
-
-        mMap.addMarker(new MarkerOptions()
-                .position(initial)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.parking)));
+        LatLng initial = new LatLng(33.485903, 126.47837);
 
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initial, 17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initial, 16));
 
         mMap.setOnMyLocationButtonClickListener(this);
 
@@ -272,7 +266,7 @@ public class MapActivity extends FragmentActivity implements
         bundle.putString("days", days);
 
         android.app.FragmentManager fragmentManager = getFragmentManager();
-        fragment = new InformationParkFragment();
+        fragment = new ParkingFragment();
         fragment.setArguments(bundle);
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.infor_park, fragment);

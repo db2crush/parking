@@ -16,7 +16,7 @@ import android.widget.TextView;
  * Created by erunn on 2017-06-06.
  */
 
-public class InformationParkFragment extends Fragment {
+public class ParkingFragment extends Fragment {
     private TextView parkName;
     private TextView parkCount;
     private TextView parkFree;
@@ -43,7 +43,7 @@ public class InformationParkFragment extends Fragment {
         }
     }
 
-    public InformationParkFragment() {
+    public ParkingFragment() {
     }
 
     @Override
@@ -92,6 +92,6 @@ public class InformationParkFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.information_park_fragment, container, false);
+        return inflater.inflate(R.layout.fragment_parking, container, false);
     }
 }
