@@ -119,6 +119,7 @@ public class MapActivity extends FragmentActivity implements
                     String result = response.body().string();
                     try {
                         JSONArray jsonArray = new JSONArray(result);
+                        Log.v("Test",jsonArray.length()+"AAAAAAAAAA");
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
                             parkings.add(new Parking(jsonObject.getString("주차장명")
@@ -128,11 +129,15 @@ public class MapActivity extends FragmentActivity implements
                                     , jsonObject.getString("요금정보")
                                     , jsonObject.getString("운영요일")
                             ));
-                            if (i == jsonArray.length() - 1) {
+                            Log.v("Test",i+"");
+
+                            if (i == jsonArray.length()-2) {
+                                Log.v("Test","if");
                                 SetMarker setMarker = new SetMarker(mMap, getApplicationContext(), parkings);
                                 setMarker.execute();
 
                             }
+
 
 
                         }

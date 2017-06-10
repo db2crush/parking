@@ -59,10 +59,10 @@ public class SetMarker extends AsyncTask<Void, Integer, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
+        Log.v("index",name+" " +"doinbackground");
         for (int i = 0; i < parkings.size(); i++) {
             address = parkings.get(i).getAddress();
             name = parkings.get(i).getName();
-            Log.v("index",name+" " +"doinbackground");
             try {
                 addrs = mGeoCoder.getFromLocationName(address, 1);
 
